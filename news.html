@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c1f16">
+<title>Security &amp; Technology Intelligence — VeridionTec</title>
+<meta name="description" content="VeridionTec daily intelligence feed — curated cybersecurity, breach, vulnerability and enterprise technology news, refreshed every 24 hours.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 64'%3E%3Crect width='72' height='64' rx='12' fill='%23ffffff'/%3E%3Cpath d='M10 12 L30 12 L37 34 L31 40 Z' fill='%230d5a32'/%3E%3Cpath d='M30 12 L62 12 L62 20 L50 20 L50 50 L42 50 L42 20 L37 20 Z' fill='%232a3036'/%3E%3C/svg%3E">
+</head>
+<body class="intel">
+
+<!-- ===== NAV ===== -->
+<header class="nav scrolled" id="nav">
+  <a href="index.html" class="brand" aria-label="VeridionTec home">
+    <svg class="brand-mark" viewBox="0 0 72 64" aria-hidden="true">
+      <ellipse cx="36" cy="34" rx="30" ry="11" fill="none" stroke="#0f6b3c" stroke-width="3" transform="rotate(-18 36 34)" stroke-linecap="round" stroke-dasharray="84 40"/>
+      <path d="M10 12 L30 12 L37 34 L31 40 Z" fill="#0d5a32"/>
+      <path d="M10 12 L20 12 L34 49 L28 49 Z" fill="#11713f"/>
+      <path d="M30 12 L62 12 L62 20 L50 20 L50 50 L42 50 L42 20 L37 20 Z" fill="#2a3036"/>
+    </svg>
+    <span class="brand-word"><b>VERIDION</b><span>TEC</span></span>
+  </a>
+  <nav class="nav-links" id="navLinks">
+    <a href="index.html#services">Services</a>
+    <a href="index.html#why">Why Us</a>
+    <a href="index.html#industries">Industries</a>
+    <a href="news.html" class="active">Intel Feed</a>
+    <a href="index.html#contact" class="nav-cta">Schedule a Consultation</a>
+  </nav>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</header>
+
+<!-- ===== INTEL HEADER ===== -->
+<section class="intel-head">
+  <div class="intel-grid" aria-hidden="true"></div>
+  <div class="wrap intel-head-in">
+    <span class="eyebrow dark"><span class="dot live"></span> Live Intelligence · auto-updated every 24h</span>
+    <h1>Security &amp; Technology Intelligence</h1>
+    <p class="lead">A daily, curated read on the threats and shifts shaping modern enterprise — cybersecurity, breaches, vulnerabilities, ransomware, cloud and the technology landscape.</p>
+    <div class="intel-stats" id="stats"></div>
+  </div>
+</section>
+
+<!-- ===== CONTROLS ===== -->
+<div class="intel-bar" id="bar">
+  <div class="wrap bar-in">
+    <div class="chips" id="chips"></div>
+    <div class="bar-search">
+      <span class="si">⌕</span>
+      <input id="search" type="search" placeholder="Search headlines & sources…" autocomplete="off">
+    </div>
+  </div>
+</div>
+
+<!-- ===== FEED ===== -->
+<main class="wrap feed-wrap">
+  <div class="feed-meta" id="feedMeta"></div>
+  <div id="featured"></div>
+  <div class="feed" id="feed"></div>
+  <div class="feed-empty hidden" id="empty">No stories match your filter. <button class="link" id="clearBtn">Clear filters</button></div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="foot">
+  <div class="wrap foot-base" style="border:none;padding-top:8px">
+    <span>© 2026 VeridionTec · Intelligence feed aggregates public reporting via Google News.</span>
+    <span id="footStamp"></span>
+  </div>
+</footer>
+
+<script src="news-data.js"></script>
+<script>
+const DATA = (window.VT_NEWS) || { items:[], categories:[], generatedAt:null, total:0, last24:0, sources:0 };
+
+const CAT_ACCENT = {
+  'Cybersecurity':'#0f6b3c',
+  'Data Breaches':'#c0392b',
+  'Vulnerabilities':'#b9770e',
+  'Ransomware':'#8e44ad',
+  'Cloud & Infrastructure':'#1f6f9c',
+  'AI & Enterprise Tech':'#2a3036'
+};
+const accent = c => CAT_ACCENT[c] || '#0f6b3c';
+
+function timeAgo(iso){
+  const d=(Date.now()-Date.parse(iso))/1000;
+  if(d<3600) return Math.max(1,Math.round(d/60))+'m ago';
+  if(d<86400) return Math.round(d/3600)+'h ago';
+  return Math.round(d/86400)+'d ago';
+}
+function fav(domain){ return 'https://www.google.com/s2/favicons?domain='+encodeURIComponent(domain||'news.google.com')+'&sz=64'; }
+function esc(s){ return (s||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+const state = { cat:'All', q:'' };
+
+function renderStats(){
+  const updated = DATA.generatedAt ? timeAgo(DATA.generatedAt) : '—';
+  const cards = [
+    ['Stories tracked', DATA.total||DATA.items.length],
+    ['Sources', DATA.sources||new Set(DATA.items.map(i=>i.source)).size],
+    ['In last 24h', DATA.last24||0],
+    ['Last refresh', updated]
+  ];
+  document.getElementById('stats').innerHTML = cards.map(([k,v])=>
+    `<div class="ist"><div class="iv">${v}</div><div class="ik">${k}</div></div>`).join('');
+  const stamp = DATA.generatedAt ? new Date(DATA.generatedAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'}) : '';
+  document.getElementById('footStamp').textContent = stamp ? 'Updated '+stamp : '';
+}
+
+function renderChips(){
+  const cats = ['All', ...DATA.categories.map(c=>c.name)];
+  document.getElementById('chips').innerHTML = cats.map(c=>{
+    const count = c==='All' ? (DATA.total||DATA.items.length) : (DATA.categories.find(x=>x.name===c)||{}).count;
+    const on = c===state.cat;
+    const style = on && c!=='All' ? `style="--ac:${accent(c)};border-color:${accent(c)};color:${accent(c)}"` : (on?'style="--ac:#0f6b3c"':'');
+    return `<button class="chip ${on?'on':''}" ${style} data-cat="${esc(c)}">${esc(c)} <span class="cc">${count||0}</span></button>`;
+  }).join('');
+}
+
+function filtered(){
+  const q=state.q.trim().toLowerCase();
+  return DATA.items.filter(i=>{
+    if(state.cat!=='All' && i.category!==state.cat) return false;
+    if(!q) return true;
+    return (i.title+' '+i.source+' '+i.category).toLowerCase().includes(q);
+  });
+}
+
+function card(i, big){
+  const ac=accent(i.category);
+  return `<a class="story ${big?'feature':''}" href="${esc(i.link)}" target="_blank" rel="noopener" style="--ac:${ac}">
+    <div class="story-top">
+      <img class="fav" src="${fav(i.domain)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <span class="src">${esc(i.source)}</span>
+      <span class="dotsep">·</span>
+      <span class="ago">${timeAgo(i.published)}</span>
+      <span class="ctag" style="--ac:${ac}">${esc(i.category)}</span>
+    </div>
+    <h3 class="story-title">${esc(i.title)}</h3>
+    <span class="story-read">Read at source →</span>
+  </a>`;
+}
+
+function render(){
+  const list=filtered();
+  const feat=document.getElementById('featured');
+  const feed=document.getElementById('feed');
+  const empty=document.getElementById('empty');
+  document.getElementById('feedMeta').textContent = `${list.length} ${list.length===1?'story':'stories'}${state.cat!=='All'?' · '+state.cat:''}${state.q?' · “'+state.q+'”':''}`;
+
+  if(!list.length){ feat.innerHTML=''; feed.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+
+  // feature the newest story only when on All with no search
+  const showFeature = state.cat==='All' && !state.q;
+  if(showFeature){ feat.innerHTML = card(list[0], true); feed.innerHTML = list.slice(1).map(i=>card(i)).join(''); }
+  else { feat.innerHTML=''; feed.innerHTML = list.map(i=>card(i)).join(''); }
+}
+
+// events
+document.getElementById('chips').addEventListener('click', e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  state.cat=b.dataset.cat; renderChips(); render();
+  window.scrollTo({top:document.getElementById('bar').offsetTop-70, behavior:'smooth'});
+});
+let deb=null;
+document.getElementById('search').addEventListener('input', e=>{
+  clearTimeout(deb); deb=setTimeout(()=>{ state.q=e.target.value; render(); }, 160);
+});
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  state.cat='All'; state.q=''; document.getElementById('search').value=''; renderChips(); render();
+});
+
+// sticky bar shadow
+const bar=document.getElementById('bar');
+window.addEventListener('scroll',()=>bar.classList.toggle('stuck', window.scrollY>260),{passive:true});
+
+// mobile menu
+const toggle=document.getElementById('navToggle'), links=document.getElementById('navLinks');
+toggle.addEventListener('click',()=>{ const o=links.classList.toggle('open'); toggle.classList.toggle('on',o); toggle.setAttribute('aria-expanded',o); });
+
+renderStats(); renderChips(); render();
+</script>
+</body>
+</html>

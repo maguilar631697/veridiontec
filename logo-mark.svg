@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 64" role="img" aria-label="VeridionTec mark">
+  <!-- orbital swoosh -->
+  <ellipse cx="36" cy="34" rx="30" ry="11" fill="none" stroke="#0f6b3c" stroke-width="3"
+           transform="rotate(-18 36 34)" stroke-linecap="round" stroke-dasharray="84 40" />
+  <!-- V (green) -->
+  <path d="M10 12 L30 12 L37 34 L31 40 Z" fill="#0d5a32" />
+  <path d="M10 12 L20 12 L34 49 L28 49 Z" fill="#11713f" />
+  <!-- T (charcoal) -->
+  <path d="M30 12 L62 12 L62 20 L50 20 L50 50 L42 50 L42 20 L37 20 Z" fill="#2a3036" />
+</svg>
